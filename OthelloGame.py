@@ -53,7 +53,8 @@ def main(argv):
             gameObject.display(gameObject.gameBoard,gameObject.changePiece(gameObject.turn))
 
             # reset the no move count
-            noMoveCount = 0
+            noMoveCount = noMoveCount + 1
+            # noMoveCount = 0
             print("")
         
         else:
