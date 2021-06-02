@@ -1,6 +1,7 @@
 import socketio
 import sys
 import getopt
+import OthelloClass
 
 sio = socketio.Client()
 gOpponentName = ''
