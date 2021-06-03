@@ -1,6 +1,7 @@
 from enum import Enum
 from OthelloClass import spaceState
 from OthelloClass import Board
+import time
 
 import sys
 
@@ -19,32 +20,19 @@ def main(argv):
 
     gameObject.setBoard(objectBoard)
 
-    gameObject.display(gameObject.gameBoard, gameObject.turn)
-
     while (gameObject.state != 1):
-        availableMoves = gameObject.legalMoves(gameObject.gameBoard,gameObject.turn)
+        inputBoard = gameObject.gameBoard
+        inputTurn = gameObject.turn
+        availableMoves = gameObject.legalMoves(inputBoard,inputTurn)
+
         totalMoveCount = gameObject.moveCount(availableMoves)
+        #gameObject.display(gameObject.gameBoard,gameObject.changePiece(gameObject.turn))
 
         if (totalMoveCount != 0):
             # this function should be cut to request from the client VM
             moveSelection = gameObject.moveSelect(totalMoveCount)
-            moveSelection = 2
-            availableMoves = [[[spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.BLACK,spaceState.WHITE,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.WHITE,spaceState.BLACK,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY]], \
-                              [[spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.BLACK,spaceState.WHITE,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.WHITE,spaceState.BLACK,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                              [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY]]]
+            print("Selected Move: " + str(moveSelection))
+            print("")
 
             # the new board is the old board with the selected move applied
             # updated the board, set the object value and display it
@@ -53,9 +41,7 @@ def main(argv):
             gameObject.display(gameObject.gameBoard,gameObject.changePiece(gameObject.turn))
 
             # reset the no move count
-            noMoveCount = noMoveCount + 1
-            # noMoveCount = 0
-            print("")
+            noMoveCount = 0
         
         else:
             noMoveCount = noMoveCount + 1
@@ -70,6 +56,7 @@ def main(argv):
             
         # the current player has played and we switch the player's current turn
         gameObject.switchTurn()
+        
     
     gameObject.winCheck(gameObject.gameBoard)
     sys.exit(0)

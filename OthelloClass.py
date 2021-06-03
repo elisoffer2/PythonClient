@@ -1,4 +1,5 @@
 from enum import Enum
+from copy import copy
 import math
 import time
 from datetime import datetime
@@ -7,7 +8,7 @@ import random
 NOHEURVAL = 2147483646    # 2^31 -2
 POSINF = 2147483645       # 2^31 - 3
 RETOVERHEAD = 50          # overhead timing of return function in milliseconds
-DEFAULT_TIME_PER_MOVE = 1 # Default timing of a move
+DEFAULT_TIME_PER_MOVE = 0.5 # Default timing of a move
 
 class myTimer:
     def __init__(self):
@@ -40,6 +41,7 @@ class Board:
         self.state = 0
         self.turn = spaceState.BLACK
         self.moveTime = DEFAULT_TIME_PER_MOVE
+        self.moveIndex = 0
 
     # is the input move one of the legal moves?
     # This function is used to determine the number to display on the board
@@ -195,7 +197,7 @@ class Board:
     def setState (self, inState):
         # state 0 is game is active
         # state 1 is game is over
-        state = inState
+        self.state = inState
 
     # initialize the game by requesting information from the user and starting the game
     def init (self):
@@ -207,7 +209,8 @@ class Board:
 
     # initializing the board if it is requested from the user
     def initBoard (self):
-        val = input("Do you want to input a non-default inital board state? (N/y): ")
+        #val = input("Do you want to input a non-default inital board state? (N/y): ")
+        val = "N"
         if (val == ""):
             return self.gameBoard
         if (val[0] == 'y' or val[0] == 'Y'):
@@ -307,11 +310,7 @@ class Board:
         moveCount          = 0
         NextBoardSpace     = 0
         moves = [[]]
-        for i in range (0,64):
-            moves.append([])
-        
-        print("Moves:")
-        print(moves)
+        oldBoard = copy(inputBoard)
 
         for rowCounter in range(0,8):
             for columnCounter in range(0,8):
@@ -332,9 +331,12 @@ class Board:
                                             
                                             # if a same piece is found in direction
                                             if(inputBoard[rowCounter+rowIterator*xchange][columnCounter+rowIterator*ychange] == pieceColor):
-                                                moves[moveCount] = self.pseudoplay(inputBoard,rowCounter,columnCounter,pieceColor);
+                                                if moveCount != 0:
+                                                    moves.append([])
+                                                moves[moveCount] = self.pseudoplay(inputBoard,rowCounter,columnCounter,pieceColor)
+                                                inputBoard = copy(oldBoard)
                                                 moveCount = moveCount + 1
-
+                                                
                                                 # This move is determined to be legal and we can move on to the next boardSpace to see if it is legal
                                                 NextBoardSpace = 1
                                             
@@ -343,7 +345,6 @@ class Board:
                                                 break
                                         else:
                                             break
-                            
                                     if NextBoardSpace != 0:
                                         break
                             
@@ -352,24 +353,21 @@ class Board:
                         if NextBoardSpace != 0:
                             break
                 NextBoardSpace = 0
-
-        print("Moves:")
-        print(moves)
         return moves
     
     # return a count of moves given the array of available moves
     def moveCount (self, moves):
-        for count in range(0,64):
-            if moves[count] == [[]]:
-                break
-        return count;
+        if moves == [[]]:
+            return 0
+        count = len(moves)
+        return count
     
     # rotate a piece from black to white or white to black
     def changePiece (self, pieceColor):
         if (pieceColor == spaceState.WHITE):
-            return spaceState.WHITE
-        else:
             return spaceState.BLACK
+        else:
+            return spaceState.WHITE
     
     # switch the current player's turn
     def switchTurn (self):
@@ -426,58 +424,50 @@ class Board:
         tempmoveSelection = 0
         totalMovesLeft    = 0
         inputStr          = ""
-
-        print(str(self.turn) + "'s turn: ")
+        copyObject = Board()
+        copyBoard  = copyObject.gameBoard
+        for i in range (0,8):
+            for j in range(0,8):
+                copyBoard[i][j] = self.gameBoard[i][j]
 
         # temporary for testing
-        return 1
-
-        # prune goes in here and check time
+        # return random.randint(1,moveMax)
         depth = 1
         a = -1*POSINF
         b = POSINF
         hval = 0
 
-        dt = datetime.now()
-        dt.microsecond
-
         cplayer = self.turn
         totalMovesLeft = self.movesLeft()
-        timer=myTimer()
-        start_t = timer.getRuntime()
-        end_t = timer.getEndtime()
-        runtime = timer.getRuntime()
-        seconds = end_t.tv_sec - start_t.tv_sec
-        useconds = end_t.tv_usec - start_t.tv_usec
-        mtime = ((seconds) * 1000 + useconds/1000.0)
+        start_t = time.time()
+        end_t = time.time()
+        mtime = end_t-start_t
 
         while (1):
             #figure out what moveSelection we should chose
-            if (movemax == 1):
+            if (moveMax == 1):
                 moveSelection = 1
                 break
-            [hval, tempmoveSelection] = alphabeta(gameBoard, depth, a, b, turn, cplayer, tempmoveSelection, start_t, end_t)
+            hval = self.alphabeta(copyBoard, depth, a, b, self.turn, cplayer, tempmoveSelection, start_t, end_t)
             if (hval == NOHEURVAL or depth > totalMovesLeft):
                 break
             else:
-                moveSelection = tempmoveSelection + 1
+                moveSelection = self.moveIndex + 1
                 if (depth > 5 and depth < 8):
-                    print("At depth: " + depth + " move number: " + moveSelection + " hval: " + hval)
+                    print("At depth: " + str(depth) + " move number: " + str(moveSelection) + " hval: " + str(hval))
                 depth = depth + 1
 
-        # gettimeofday(&end_t,NULL);
-        # seconds = end_t.tv_sec - start_t.tv_sec;
-        # useconds = end_t.tv_usec - start_t.tv_usec;
-        # mtime = ((seconds) * 1000 + useconds/1000.0);
+        end_t = time.time()
+        mtime = (end_t-start_t)*1000
 
-        print("At depth: " + depth-1 + ", Selecting Move: " + str(moveSelection))
+        print("At depth: " + str(depth-1) + ", Selecting Move: " + str(moveSelection))
         print("Elapsed time: " + str(mtime) + " milliseconds")
 
         return moveSelection;
     
     # This is the alphabeta algorithm called by moveSelect
     # Move select will be ported to a separate piece of software which will be developed by the VM users
-    def alphabeta (self, inputBoard, depth, a, b, pieceColor, playerTurn, indicator, startTime, endTime):
+    def alphabeta (self, inputBoard, depth, a, b, pieceColor, playerTurn, moveIndex, startTime, endTime):
        # ind is the pointer to moveSelection only passed in when first called
         tempv = 0
         v = 0
@@ -487,64 +477,54 @@ class Board:
         useconds = 0
         nextMoves = [[]]
 
-        # temporary patch
-        return 1
+        endTime = time.time()
+        mtime = (endTime-startTime)*1000
 
-        for i in range (0,64):
-            nextMoves.append([])
-
-        end_t = timer.getEndtime()
-        runtime = timer.getRuntime()
-        seconds = end_t.tv_sec - start_t.tv_sec
-        useconds = end_t.tv_usec - start_t.tv_usec
-        mtime = ((seconds) * 1000 + useconds/1000.0)
-
-        if (mtime + RETOVERHEAD > moveTime):
+        if (mtime + RETOVERHEAD > self.moveTime):
             return NOHEURVAL
 
-        # delete AI moves somewhere where its not needed: after depth is searched?
-        # modify AIMoves to only return a specific move number and if its NULL then
-        # exit the loop  and return v
         nextMoves = self.AIMoves(inputBoard,playerTurn)
-        if (depth == 0 or nextMoves[0] == [[]]):
+        if (depth == 0 or nextMoves == [[]]):
             if (pieceColor == spaceState.BLACK):
                 v = self.heuristicFunction0(inputBoard,pieceColor)
 
             elif (pieceColor == spaceState.WHITE):
                 v = self.heuristicFunction1(inputBoard,pieceColor)
 
-        elif (pt == pieceColor):
+        elif (playerTurn == pieceColor):
             v = -1*POSINF
-            pt = changePiece(pt)
-            while (nextMoves[i] != [[]]):
-                tempv = alphabeta(nextMoves[i], depth - 1, a, b, pieceColor, playerTurn, -1,start_t,end_t)
-                if (v < tempv):
-                    v = tempv
-                    if (indicator != -1):
-                        indicator = i 
-                if b >= v:
-                    b = v
-                if b <= a:
-                    break
-                i = i + 1
-
+            playerTurn = self.changePiece(playerTurn)
+            if (nextMoves[i] != []):
+                while (i < len(nextMoves)):
+                    tempv = self.alphabeta(nextMoves[i], depth - 1, a, b, pieceColor, playerTurn, -1,startTime,endTime)
+                    if (v < tempv):
+                        v = tempv
+                        if (moveIndex != -1):
+                            self.moveIndex = i 
+                            print("At depth: " + str(depth) + " best move is: " + str(self.moveIndex + 1) + " with hval = " + str(v))
+                    if b >= v:
+                        b = v
+                    if b <= a:
+                        break
+                    i = i + 1
         else:
             v = POSINF
             playerTurn = self.changePiece(playerTurn)
-            while (nextMoves[i] != [[]]):
-                tempv = alphabeta(nextMoves[i], depth - 1, a, b, pieceColor, playerTurn, -1, start_t, end_t)
-                if (v >= tempv):
-                    v = tempv
-                if b >= v:
-                    b = v
-                if b <= a:
-                    break
-                i = i + 1
+            if (nextMoves[i] != []):
+                while (i < len(nextMoves)):
+                    tempv = self.alphabeta(nextMoves[i], depth - 1, a, b, pieceColor, playerTurn, -1, startTime, endTime)
+                    if (v >= tempv):
+                        v = tempv
+                    if b >= v:
+                        b = v
+                    if b <= a:
+                        break
+                    i = i + 1
         return v
     
     # pass in the current board and current player's turn
     # output the list of moves for the AI
-    def AIMoves (self, inputboard, pieceColor):
+    def AIMoves (self, inputBoard, pieceColor):
         rowCounter         = 0
         columnCounter      = 0
         xchange            = 0
@@ -553,11 +533,7 @@ class Board:
         moveCount          = 0
         NextBoardSpace     = 0
         moves = [[]]
-        for i in range (0,64):
-            moves.append([])
-        
-        print("Moves:")
-        print(moves)
+        oldBoard = copy(inputBoard)
 
         for rowCounter in range(0,8):
             for columnCounter in range(0,8):
@@ -578,7 +554,10 @@ class Board:
                                             
                                             # if a same piece is found in direction
                                             if(inputBoard[rowCounter+rowIterator*xchange][columnCounter+rowIterator*ychange] == pieceColor):
-                                                moves[moveCounter] = self.pseudoplay(inputBoard,rowCounter,columnCounter,pieceColor);
+                                                if moveCount != 0:
+                                                    moves.append([])
+                                                moves[moveCount] = self.pseudoplay(inputBoard,rowCounter,columnCounter,pieceColor);
+                                                inputBoard = copy(oldBoard)
                                                 moveCount = moveCount + 1
 
                                                 # This move is determined to be legal and we can move on to the next boardSpace to see if it is legal
@@ -599,8 +578,6 @@ class Board:
                             break
                 NextBoardSpace = 0
 
-        print("Moves:")
-        print(moves)
         return moves
 
     # input the current board, current player's turn, and selected move on the board
@@ -611,14 +588,11 @@ class Board:
         rowCounter    = 0
         columnCounter = 0
 
-        pseudoboard = [[spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                       [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                       [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                       [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.BLACK,spaceState.WHITE,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                       [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.WHITE,spaceState.BLACK,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                       [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], \
-                       [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY], 
-                       [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY]]
+        pseudoObject = Board()
+        pseudoBoard = pseudoObject.gameBoard
+        for i in range (0,8):
+            for j in range(0,8):
+                pseudoBoard[i][j] = inputBoard[i][j]
 
         for xchange in range(-1,2):
             for ychange in range(-1,2):
@@ -646,21 +620,54 @@ class Board:
                                 # if a same piece is found in direction
                                 if(inputBoard[rowSelect+rowCounter*xchange][columnSelect+rowCounter*ychange] == pieceColor):
                                     for columnCounter in range(0,rowCounter):
-                                        pseudoboard[rowSelect+columnCounter*xchange][columnSelect+columnCounter*ychange] = pieceColor
+                                        pseudoBoard[rowSelect+columnCounter*xchange][columnSelect+columnCounter*ychange] = pieceColor
                                     break
+                                    
                                 
                                 # if empty spot found in direction
-                                elif (inputBoard[rowSelect+rowCounter*xchange][columnSelect+rowCounter*ychange] == EMPTY):
+                                elif (inputBoard[rowSelect+rowCounter*xchange][columnSelect+rowCounter*ychange] == spaceState.EMPTY):
                                     break
                             
                             else:
                                 break
-        return pseudoboard
+        return pseudoBoard
     
     # input takes in the current player's turn and the current game board
     # output a zero sum value representative of the who is winning at that moment
     def heuristicFunction0 (self, inputBoard, pieceColor):
-        val = random.randint(0,10) - 5 
+        #ensure the heurstic is zero sum!
+        val = 0;
+        corner = 0
+        for i in range(0,8):
+            for j in range(0,8):
+                if (inputBoard[i][j] == pieceColor):
+                    val = val - 1
+                elif (inputBoard[i][j] != spaceState.EMPTY):
+                    val = val + 1
+        
+        if inputBoard[0][0] == pieceColor:
+            corner = corner - 1
+        elif inputBoard[0][0] != spaceState.EMPTY:
+            corner = corner + 1
+        
+        if inputBoard[7][0] == pieceColor:
+            corner = corner - 1
+        elif inputBoard[7][0] != spaceState.EMPTY:
+            corner = corner + 1
+
+        if inputBoard[0][7] == pieceColor:
+            corner = corner - 1
+        elif inputBoard[0][7] != spaceState.EMPTY:
+            corner = corner + 1
+
+        if inputBoard[7][7] == pieceColor:
+            corner = corner - 1
+        elif inputBoard[7][7] != spaceState.EMPTY:
+            corner = corner + 1
+
+        val = val*10 + corner*300
+
+        val = val*10
         return val
 
     # input takes in the current player's turn and the current game board
@@ -668,12 +675,33 @@ class Board:
     def heuristicFunction1(self, inputBoard, pieceColor):
         #ensure the heurstic is zero sum!
         val = 0;
+        corner = 0
         for i in range(0,8):
             for j in range(0,8):
                 if (inputBoard[i][j] == pieceColor):
                     val = val + 1
-                elif (inputBoard[i][j] != EMPTY):
+                elif (inputBoard[i][j] != spaceState.EMPTY):
                     val = val - 1
+        
+        if inputBoard[0][0] == pieceColor:
+            corner = corner + 1
+        elif inputBoard[0][0] != spaceState.EMPTY:
+            corner = corner - 1
+        
+        if inputBoard[7][0] == pieceColor:
+            corner = corner + 1
+        elif inputBoard[7][0] != spaceState.EMPTY:
+            corner = corner - 1
 
-        val = val*100 + random.randint(0,20) - 10
+        if inputBoard[0][7] == pieceColor:
+            corner = corner + 1
+        elif inputBoard[0][7] != spaceState.EMPTY:
+            corner = corner - 1
+
+        if inputBoard[7][7] == pieceColor:
+            corner = corner + 1
+        elif inputBoard[7][7] != spaceState.EMPTY:
+            corner = corner - 1
+
+        val = val*10 + corner*300
         return val
