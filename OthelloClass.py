@@ -8,7 +8,7 @@ import random
 NOHEURVAL = 2147483646    # 2^31 -2
 POSINF = 2147483645       # 2^31 - 3
 RETOVERHEAD = 50          # overhead timing of return function in milliseconds
-DEFAULT_TIME_PER_MOVE = 0.5 # Default timing of a move
+DEFAULT_TIME_PER_MOVE = 3000 # Default timing of a move
 
 class myTimer:
     def __init__(self):
@@ -416,7 +416,6 @@ class Board:
     # This is the function that needs to be requested from the client to the server
     def moveSelect (self, moveMax):
 
-
         mtime             = 0
         seconds           = 0 
         useconds          = 0
@@ -453,15 +452,15 @@ class Board:
                 break
             else:
                 moveSelection = self.moveIndex + 1
-                if (depth > 5 and depth < 8):
+                if (depth > 3 and depth < 8):
                     print("At depth: " + str(depth) + " move number: " + str(moveSelection) + " hval: " + str(hval))
                 depth = depth + 1
 
         end_t = time.time()
         mtime = (end_t-start_t)*1000
 
-        print("At depth: " + str(depth-1) + ", Selecting Move: " + str(moveSelection))
-        print("Elapsed time: " + str(mtime) + " milliseconds")
+        # print("At depth: " + str(depth-1) + ", Selecting Move: " + str(moveSelection))
+        # print("Elapsed time: " + str(mtime) + " milliseconds")
 
         return moveSelection;
     
@@ -501,7 +500,7 @@ class Board:
                         v = tempv
                         if (moveIndex != -1):
                             self.moveIndex = i 
-                            print("At depth: " + str(depth) + " best move is: " + str(self.moveIndex + 1) + " with hval = " + str(v))
+                            # print("At depth: " + str(depth) + " best move is: " + str(self.moveIndex + 1) + " with hval = " + str(v))
                     if b >= v:
                         b = v
                     if b <= a:
@@ -665,9 +664,7 @@ class Board:
         elif inputBoard[7][7] != spaceState.EMPTY:
             corner = corner + 1
 
-        val = val*10 + corner*300
-
-        val = val*10
+        val = val*10 + corner*300 + random.randint(-4,4)
         return val
 
     # input takes in the current player's turn and the current game board
@@ -703,5 +700,5 @@ class Board:
         elif inputBoard[7][7] != spaceState.EMPTY:
             corner = corner - 1
 
-        val = val*10 + corner*300
+        val = val*10 + corner*300 + random.randint(-4,4)
         return val
