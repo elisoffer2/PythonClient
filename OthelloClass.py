@@ -8,7 +8,9 @@ import random
 NOHEURVAL = 2147483646    # 2^31 -2
 POSINF = 2147483645       # 2^31 - 3
 RETOVERHEAD = 50          # overhead timing of return function in milliseconds
-DEFAULT_TIME_PER_MOVE = 3000 # Default timing of a move
+DEFAULT_TIME_PER_MOVE = 2 # Default timing of a move
+
+moveTimeout = DEFAULT_TIME_PER_MOVE
 
 class myTimer:
     def __init__(self):
@@ -40,7 +42,7 @@ class Board:
                           [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY]]
         self.state = 0
         self.turn = spaceState.BLACK
-        self.moveTime = DEFAULT_TIME_PER_MOVE
+        self.moveTime = moveTimeout
         self.moveIndex = 0
 
     # is the input move one of the legal moves?
@@ -201,7 +203,7 @@ class Board:
 
     # initialize the game by requesting information from the user and starting the game
     def init (self):
-        inputTime = DEFAULT_TIME_PER_MOVE
+        inputTime = moveTimeout
         print("How much time should the AI take on its turn (in seconds): " + str(inputTime))
         self.moveTime = (int)(1000*inputTime)
         print("")
