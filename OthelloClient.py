@@ -114,7 +114,7 @@ def make_move(data):
 
     output_file = open("GameLogs/" + gTeamName + "_" + gameID + ".txt","a")
     if (turnState == OthelloClass.spaceState.WHITE and IsFirstMove(ToArray(boardStr))):
-        output_file.writelines("1:0000000000000000000000000001200000021000000000000000000000000000:their turn\n")
+        output_file.writelines(["1:0000000000000000000000000001200000021000000000000000000000000000:their ", "turn\n"])
     output_file.writelines(str(turnStr) + ":" + boardStr + ":my turn\n")
     output_file.close()
 
