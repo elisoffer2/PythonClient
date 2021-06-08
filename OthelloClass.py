@@ -147,8 +147,8 @@ class Board:
         normal = "\033[0m";
 
         # showing which player is what color
-        print("Player 1 -> \033[47;30;7mBlack" + normal)
-        print("Player 2 -> \033[40;37;7mWhite" + normal)
+        # print("Player 1 -> \033[47;30;7mBlack" + normal)
+        # print("Player 2 -> \033[40;37;7mWhite" + normal)
 
         # display top boarder with numbers
         print("     00    01    02    03    04    05    06    07")

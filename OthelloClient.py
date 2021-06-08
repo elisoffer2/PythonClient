@@ -5,6 +5,7 @@ import OthelloClass
 
 sio = socketio.Client()
 gOpponentName = ''
+gTeamName = ''
 
 def ToArray(in_boardStr):
     OthelloObject = OthelloClass.Board()
@@ -29,6 +30,22 @@ def BoardToString(in_gameBoard):
                 strBoard = strBoard + str(2)
     return strBoard
 
+def IsFirstMove(in_gameBoard):
+    white_count = 0
+    black_count = 0
+
+    for i in range(0,8):
+        for j in range(0,8):
+            if (in_gameBoard[i][j] == OthelloClass.spaceState.BLACK):
+                black_count = black_count + 1
+            elif (in_gameBoard[i][j] == OthelloClass.spaceState.WHITE):
+                white_count = white_count + 1
+    
+    if (white_count == 1 and black_count == 4):
+        return 1
+    else:
+        return 0
+
 @sio.on('connect')
 def my_connect():
     # print("I'm connected!")
@@ -49,6 +66,7 @@ def my_connect():
         elif opt in ("-i", "--ipaddr"):
             serverIP = arg
     print("Team Name is", teamName)
+    gTeamName = teamName
     data = {}
     data['name'] = teamName
     sio.emit("set team", data)
@@ -60,11 +78,17 @@ def set_timeout(data):
 
 @sio.on('set opponent')
 def set_opponent(data):
-    print("Set Opponnent Requested")
+    # print("Set Opponnent Requested")
     gOpponentName = data["name"]
     gameID = data["game_id"]
     # print(data["game_id"])
     # print(data["name"])
+    print(gTeamName)
+    print(gameID)
+    print(gOpponentName)
+    output_file = open("GameLogs/" + gTeamName + "_" + gameID + ".txt","w")
+    output_file.writelines(gTeamName + " vs. " + gOpponentName + " gameID: " + gameID +"\n")
+    output_file.close()
     print("Game ID set to " + gameID + " with opponent " + gOpponentName);
 
 @sio.on('make move')
@@ -85,6 +109,13 @@ def make_move(data):
     if (turnStr == 2):
         # print("making WHITE")
         turnState = OthelloClass.spaceState.WHITE
+
+    output_file = open("GameLogs/" + gTeamName + "_" + gameID + ".txt","a")
+    if (turnState == OthelloClass.spaceState.WHITE and IsFirstMove(ToArray(boardStr))):
+        output_file.writelines("1:0000000000000000000000000001200000021000000000000000000000000000:their turn\n")
+    output_file.writelines(str(turnStr) + ":" + boardStr + ":my turn\n")
+    output_file.close()
+
 
     if (othelloBoard.turn != turnState):
         othelloBoard.switchTurn()
@@ -119,9 +150,15 @@ def make_move(data):
         # print(out_boardStr)
         # print(turnStr)
 
+        output_file = open("GameLogs/" + gTeamName + "_" + gameID + ".txt","a")
+        output_file.writelines(str(turnStr % 2 + 1) + ":" + out_boardStr + ":their turn\n")
+        output_file.close()
         sio.emit("move", data)
 
     else:
+        output_file = open("GameLogs/" + gTeamName + "_" + gameID + ".txt","a")
+        output_file.writelines(str(turnStr % 2 + 1) + ":" + boardStr + ":their turn - I pass\n")
+        output_file.close()
         sio.emit("pass", data)
 
 
@@ -131,7 +168,8 @@ def game_ended(data):
         gameID = data["game_id"]
         black_count = data["black_count"]
         white_count = data["white_count"]
-        print("Game ended: B-" + str(black_count) + " W-" + str(white_count))
+        print("Game " + gameID + "ended: ")
+        print("Results: Black-" + str(black_count) + " White-" + str(white_count))
 
 @sio.on('tournament ended')
 def tournament_ended(data):
@@ -147,7 +185,7 @@ def tournament_ended(data):
 
 @sio.event
 def disconnect():
-    print("Disconnecting")
+    print("Disconnecting from the server")
 
 def main(argv):
     teamName = ''
@@ -164,6 +202,7 @@ def main(argv):
             sys.exit(0)
         elif opt in ("-n", "--name"):
             teamName = arg
+            gTeamName = teamName
         elif opt in ("-i", "--ipaddr"):
             serverIP = arg
     arguementCount = len(sys.argv)
