@@ -42,7 +42,7 @@ class Board:
                           [spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY,spaceState.EMPTY]]
         self.state = 0
         self.turn = spaceState.BLACK
-        self.moveTime = moveTimeout
+        self.moveTime = moveTimeout*1000
         self.moveIndex = 0
 
     # is the input move one of the legal moves?
@@ -204,8 +204,8 @@ class Board:
     # initialize the game by requesting information from the user and starting the game
     def init (self):
         inputTime = moveTimeout
-        print("How much time should the AI take on its turn (in seconds): " + str(inputTime))
-        self.moveTime = (int)(1000*inputTime)
+        print("How much time should the AI take on its turn (in seconds): " + str(inputTime/1000))
+        self.moveTime = (int)(inputTime)
         print("")
         return 0
 

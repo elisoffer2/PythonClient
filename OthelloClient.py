@@ -55,8 +55,8 @@ def my_connect():
 
 @sio.on('set timeout')
 def set_timeout(data):
-    moveTimeout = data['timeout']
-    print("moveTimeout set to " + str(moveTimeout) + " Seconds")
+    OthelloClass.moveTimeout = data['timeout']
+    print("moveTimeout set to " + str(OthelloClass.moveTimeout) + " Seconds")
 
 @sio.on('set opponent')
 def set_opponent(data):
@@ -144,8 +144,7 @@ def tournament_ended(data):
 
 @sio.event
 def disconnect():
-    print('Disconnected from server')
-    sys.exit()
+    sys.exit(0)
 
 def main(argv):
     teamName = ''
@@ -159,7 +158,7 @@ def main(argv):
     for opt, arg in opts:
         if opt == '-h':
             print("python OthelloClient.py -n <Team Name> -i <Server IP Address>")
-            sys.exit()
+            sys.exit(0)
         elif opt in ("-n", "--name"):
             teamName = arg
         elif opt in ("-i", "--ipaddr"):
