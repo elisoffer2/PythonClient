@@ -5,8 +5,8 @@ import time
 from datetime import datetime
 import random
 
-NOHEURVAL = 2147483646    # 2^31 -2
-POSINF = 2147483645       # 2^31 - 3
+NOHEURVAL = 2147483645    # 2^31 -1
+POSINF = 2147483646       # 2^31 - 2
 RETOVERHEAD = 50          # overhead timing of return function in milliseconds
 DEFAULT_TIME_PER_MOVE = 2 # Default timing of a move
 
@@ -481,7 +481,7 @@ class Board:
         endTime = time.time()
         mtime = (endTime-startTime)*1000
 
-        if (mtime + RETOVERHEAD > self.moveTime):
+        if (mtime + RETOVERHEAD > self.moveTime and v != POSINF and v != -1*POSINF):
             return NOHEURVAL
 
         nextMoves = self.AIMoves(inputBoard,playerTurn)

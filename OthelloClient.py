@@ -131,7 +131,7 @@ def game_ended(data):
         gameID = data["game_id"]
         black_count = data["black_count"]
         white_count = data["white_count"]
-        print("Game ended: B-" + str(black_count) + " W-" + str(white_count));
+        print("Game ended: B-" + str(black_count) + " W-" + str(white_count))
 
 @sio.on('tournament ended')
 def tournament_ended(data):
@@ -140,11 +140,14 @@ def tournament_ended(data):
     win_count = data["win_count"]
     tie_count = data["tie_count"]
     print("Tournament results for " + pname + " Games: " + str(game_count))
-    print(" Wins: " + str(win_count) + " Ties: " + str(tie_count))
+    print("Wins: " + str(win_count) + " Losses: " +
+          str(game_count - win_count - tie_count) + " Ties: " + str(tie_count))
+          
+    sio.disconnect()
 
 @sio.event
 def disconnect():
-    sys.exit(0)
+    print("Disconnecting")
 
 def main(argv):
     teamName = ''
@@ -171,6 +174,7 @@ def main(argv):
 
     sio.connect("http://" + serverIP + ":8080")
     sio.wait()
+    sys.exit(0)
 
 
 if __name__ == "__main__":
