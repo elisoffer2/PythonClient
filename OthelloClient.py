@@ -66,6 +66,7 @@ def my_connect():
         elif opt in ("-i", "--ipaddr"):
             serverIP = arg
     print("Team Name is", teamName)
+    global gTeamName
     gTeamName = teamName
     data = {}
     data['name'] = teamName
@@ -79,6 +80,7 @@ def set_timeout(data):
 @sio.on('set opponent')
 def set_opponent(data):
     # print("Set Opponnent Requested")
+    global gOpponentName
     gOpponentName = data["name"]
     gameID = data["game_id"]
     # print(data["game_id"])
@@ -202,6 +204,7 @@ def main(argv):
             sys.exit(0)
         elif opt in ("-n", "--name"):
             teamName = arg
+            global gTeamName
             gTeamName = teamName
         elif opt in ("-i", "--ipaddr"):
             serverIP = arg
