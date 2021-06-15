@@ -203,7 +203,7 @@ class Board:
 
     # initialize the game by requesting information from the user and starting the game
     def init (self):
-        inputTime = moveTimeout
+        inputTime = moveTimeout*1000
         print("How much time should the AI take on its turn (in seconds): " + str(inputTime/1000))
         self.moveTime = (int)(inputTime)
         print("")
@@ -217,7 +217,7 @@ class Board:
             return self.gameBoard
         if (val[0] == 'y' or val[0] == 'Y'):
             filename = input("Input the name of the file containing the board state: ")
-            self.gameBoard = getBoard(filename)
+            self.gameBoard = self.getBoard(filename)
         return self.gameBoard
         
     # get an input board from the input filename

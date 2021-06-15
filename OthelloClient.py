@@ -85,9 +85,6 @@ def set_opponent(data):
     gameID = data["game_id"]
     # print(data["game_id"])
     # print(data["name"])
-    print(gTeamName)
-    print(gameID)
-    print(gOpponentName)
     output_file = open("GameLogs/" + gTeamName + "_" + gameID + ".txt","w")
     output_file.writelines(gTeamName + " vs. " + gOpponentName + " gameID: " + gameID +"\n")
     output_file.close()
