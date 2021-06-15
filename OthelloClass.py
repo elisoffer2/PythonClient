@@ -8,7 +8,7 @@ import random
 NOHEURVAL = 2147483645    # 2^31 -1
 POSINF = 2147483646       # 2^31 - 2
 RETOVERHEAD = 50          # overhead timing of return function in milliseconds
-DEFAULT_TIME_PER_MOVE = 2 # Default timing of a move
+DEFAULT_TIME_PER_MOVE = 1 # Default timing of a move
 
 moveTimeout = DEFAULT_TIME_PER_MOVE
 
