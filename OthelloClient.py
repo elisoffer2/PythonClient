@@ -191,27 +191,26 @@ def main(argv):
     serverIP = ''
 
     try:
-        opts, args = getopt.getopt(argv,"hn:i:",["teamName=","serverIP="])
+        opts, args = getopt.getopt(argv,"hn:",["teamName="])
     except getopt.GetoptError:
-        print("python OthelloClient.py -n <Team Name> -i <Server IP Address>")
+        print("python OthelloClient.py -n <Team Name>")
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print("python OthelloClient.py -n <Team Name> -i <Server IP Address>")
+            print("python OthelloClient.py -n <Team Name>")
             sys.exit(0)
         elif opt in ("-n", "--name"):
             teamName = arg
             global gTeamName
             gTeamName = teamName
-        elif opt in ("-i", "--ipaddr"):
-            serverIP = arg
+    serverIP = ""
     arguementCount = len(sys.argv)
     arguementStrings = str(sys.argv)
     data = {}
     data['name'] = teamName
-    print("connecting to http://" + serverIP + ":8080")
+    print("connecting to http://engine.rtx-hackathon.xyz:8080")
 
-    sio.connect("http://" + serverIP + ":8080")
+    sio.connect("http://engine.rtx-hackathon.xyz:8080")
     sio.wait()
     sys.exit(0)
 
