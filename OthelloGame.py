@@ -10,15 +10,18 @@ from enum import Enum
 def main(argv):
     gameObject = Board()
 
+    gameType = 3
     totalMoveCount = 0
     noMoveCount = 0
     moveSelection = 0
 
-    gameObject.init()
+    gameType = gameObject.init()
 
     objectBoard = gameObject.initBoard()
 
     gameObject.setBoard(objectBoard)
+
+    gameObject.display(gameObject.gameBoard,gameObject.turn)
 
     while (gameObject.state != 1):
         inputBoard = gameObject.gameBoard
@@ -30,7 +33,7 @@ def main(argv):
 
         if (totalMoveCount != 0):
             # this function should be cut to request from the client VM
-            moveSelection = gameObject.moveSelect(totalMoveCount)
+            moveSelection = gameObject.moveSelect(gameType, totalMoveCount)
             print("Selected Move: " + str(moveSelection))
             print("")
 

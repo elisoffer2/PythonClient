@@ -203,11 +203,72 @@ class Board:
 
     # initialize the game by requesting information from the user and starting the game
     def init (self):
+        ans1 = 'n'
+        ans2 = 'n'
+        global moveTimeout
+        moveTimeout = DEFAULT_TIME_PER_MOVE
+
         inputTime = moveTimeout*1000
-        print("How much time should the AI take on its turn (in seconds): " + str(inputTime/1000))
-        self.moveTime = (int)(inputTime)
-        print("")
-        return 0
+        ans1 = input("is Black Human? (y/n): ")
+        ans2 = input("is White Human? (y/n): ")
+
+        if (ans1 == 'y' or ans1 == 'Y') and (ans2 == 'y' or ans2 == 'Y'):
+            print("Player 1 \033[47;30;7mBlack\033[0m is Human")
+            print("Player 2 \033[40;37;7mWhite\033[0m is Human")
+            self.moveTime = (int)(inputTime)
+            print("")
+            return 0
+        elif (ans1 == 'y' or ans1 == 'Y'):
+            print("Player 1 \033[47;30;7mBlack\033[0m is Human")
+            print("Player 2 \033[40;37;7mWhite\033[0m is Computer")
+            validTime = False
+            while(not validTime):
+                try:
+                    moveTimeout = int(input("How much time should the AI take on its turn (in seconds): "))
+                    if(moveTimeout < 1):
+                        print("Not a Valid Entry, Select another time in seconds: ")
+                    else:
+                        validTime = True
+                except ValueError:
+                    validTime = False
+            inputTime = moveTimeout*1000
+            self.moveTime = (int)(inputTime)
+            print("")
+            return 1
+        elif (ans2 == 'y' or ans2 == 'Y'):
+            print("Player 1 \033[47;30;7mBlack\033[0m is Computer")
+            print("Player 2 \033[40;37;7mWhite\033[0m is Human")
+            validTime = False
+            while(not validTime):
+                try:
+                    moveTimeout = int(input("How much time should the AI take on its turn (in seconds): "))
+                    if(moveTimeout < 1):
+                        print("Not a Valid Entry, Select another time in seconds: ")
+                    else:
+                        validTime = True
+                except ValueError:
+                    validTime = False
+            inputTime = moveTimeout*1000
+            self.moveTime = (int)(inputTime)
+            print("")
+            return 2
+        else:
+            print("Player 1 \033[47;30;7mBlack\033[0m is Computer")
+            print("Player 2 \033[40;37;7mWhite\033[0m is Computer")
+            validTime = False
+            while(not validTime):
+                try:
+                    moveTimeout = int(input("How much time should the AI take on its turn (in seconds): "))
+                    if(moveTimeout < 1):
+                        print("Not a Valid Entry, Select another time in seconds: ")
+                    else:
+                        validTime = True
+                except ValueError:
+                    validTime = False
+            inputTime = moveTimeout*1000
+            self.moveTime = (int)(inputTime)
+            print("")
+            return 3
 
     # initializing the board if it is requested from the user
     def initBoard (self):
@@ -416,7 +477,7 @@ class Board:
         return numMovesLeft
 
     # This is the function that needs to be requested from the client to the server
-    def moveSelect (self, moveMax):
+    def moveSelect (self, gameType, moveMax):
 
         mtime             = 0
         seconds           = 0 
@@ -431,38 +492,51 @@ class Board:
             for j in range(0,8):
                 copyBoard[i][j] = self.gameBoard[i][j]
 
-        # temporary for testing
-        # return random.randint(1,moveMax)
-        depth = 1
-        a = -1*POSINF
-        b = POSINF
-        hval = 0
+        if(gameType == 0 or (gameType == 1 and self.turn == spaceState.BLACK) or (gameType == 2 and self.turn == spaceState.WHITE)):
+            # request input from the VM Client for human player move
+            valid_move = False
+            while(not valid_move):
+                try:
+                    moveSelection = int(input("\nPlayer " + str(self.turn) +" Enter move: "))
+                    if(moveSelection < 1 or moveSelection > moveMax):
+                        print("Not a Valid Entry, Select another move: ")
+                    else:
+                        valid_move = True
+                except ValueError:
+                    valid_move = False
 
-        cplayer = self.turn
-        totalMovesLeft = self.movesLeft()
-        start_t = time.time()
-        end_t = time.time()
-        mtime = end_t-start_t
+        elif (gameType == 3 or (gameType == 2 and self.turn == spaceState.BLACK) or (gameType == 1 and self.turn == spaceState.WHITE)):
+            
+            depth = 1
+            a = -1*POSINF
+            b = POSINF
+            hval = 0
 
-        while (1):
-            #figure out what moveSelection we should chose
-            if (moveMax == 1):
-                moveSelection = 1
-                break
-            hval = self.alphabeta(copyBoard, depth, a, b, self.turn, cplayer, tempmoveSelection, start_t, end_t)
-            if (hval == NOHEURVAL or depth > totalMovesLeft):
-                break
-            else:
-                moveSelection = self.moveIndex + 1
-                if (depth > 3 and depth < 8):
-                    print("At depth: " + str(depth) + " move number: " + str(moveSelection) + " hval: " + str(hval))
-                depth = depth + 1
+            cplayer = self.turn
+            totalMovesLeft = self.movesLeft()
+            start_t = time.time()
+            end_t = time.time()
+            mtime = end_t-start_t
 
-        end_t = time.time()
-        mtime = (end_t-start_t)*1000
+            while (1):
+                #figure out what moveSelection we should chose
+                if (moveMax == 1):
+                    moveSelection = 1
+                    break
+                hval = self.alphabeta(copyBoard, depth, a, b, self.turn, cplayer, tempmoveSelection, start_t, end_t)
+                if (hval == NOHEURVAL or depth > totalMovesLeft):
+                    break
+                else:
+                    moveSelection = self.moveIndex + 1
+                    if (depth > 3 and depth < 8):
+                        print("At depth: " + str(depth) + " move number: " + str(moveSelection) + " hval: " + str(hval))
+                    depth = depth + 1
 
-        # print("At depth: " + str(depth-1) + ", Selecting Move: " + str(moveSelection))
-        # print("Elapsed time: " + str(mtime) + " milliseconds")
+            end_t = time.time()
+            mtime = (end_t-start_t)*1000
+
+            # print("At depth: " + str(depth-1) + ", Selecting Move: " + str(moveSelection))
+            # print("Elapsed time: " + str(mtime) + " milliseconds")
 
         return moveSelection;
     

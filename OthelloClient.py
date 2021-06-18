@@ -133,7 +133,7 @@ def make_move(data):
     # print("Total Move Count: " + str(totalMoveCount) + " for player: " + str(turnStr))
 
     if (totalMoveCount != 0):
-        moveSelection = othelloBoard.moveSelect(totalMoveCount)
+        moveSelection = othelloBoard.moveSelect(3,totalMoveCount)
 
         objectBoard = availableMoves[moveSelection-1]
         othelloBoard.setBoard(objectBoard)
